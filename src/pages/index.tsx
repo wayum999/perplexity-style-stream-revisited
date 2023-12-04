@@ -6,19 +6,50 @@ import Head from "next/head";
 import { Analytics } from '@vercel/analytics/react';
 
 
-function chunkString(str: string): string[] {
-  const words: string[] = str.split(" ");
-  const chunks: string[] = [];
 
-  for(let i = 0; i < words.length; i += 2) {
-    const chunk = words.slice(i, i + 2);
-    if (chunk.length === 2) {
-      chunks.push(chunk.join(" ") + " ");
+function chunkString(str: string): string[] {
+  const chunks: string[] = [];
+  const words = str.split(" ");
+
+  for (let i = 0; i < words.length; i++) {
+    let chunk = words[i];
+    let nextChunk = (i + 1 < words.length) ? words[i + 1] : "";
+
+    if (chunk.includes("\n")) {
+      // Handle newline characters
+      const subChunks = chunk.split("\n");
+      subChunks.forEach((subChunk, index) => {
+        chunks.push(subChunk);
+        if (index < subChunks.length - 1) {
+          chunks.push("\n");
+        } else if (!nextChunk.includes("\n")) {
+          chunks.push(" ");  // Add space if the next chunk doesn't start with a newline
+        }
+      });
+    } else {
+      chunks.push(chunk + (nextChunk.includes("\n") ? "" : " "));
     }
   }
 
   return chunks;
 }
+
+{/*FROM ORIGINAL*/}
+//
+// function chunkString(str: string): string[] {
+//   const words: string[] = str.split(" ");
+//   const chunks: string[] = [];
+//
+//   for(let i = 0; i < words.length; i += 2) {
+//     const chunk = words.slice(i, i + 2);
+//     if (chunk.length === 2) {
+//       chunks.push(chunk.join(" ") + " ");
+//     }
+//   }
+//
+//   return chunks;
+// }
+{/*FROM ORIGINAL*/}
 
 export default function Home() {
   const { messages, input, handleInputChange, isLoading, handleSubmit } = useChat()
@@ -58,38 +89,83 @@ export default function Home() {
               {
                 messages.length <= 0 && (
                   <div className="w-full flex items-center justify-center font-thin text-lg text-neutral-400">
-                    Ask GPT4 any question to get started
+
                   </div>
                 )
               }
             </motion.div>
+            {/*FROM ORIGINAL*/}
+            {/*{*/}
+            {/*  // If loading, do not show the last message statically*/}
+            {/*  (shouldAnimateLastMessage ? messages.slice(0, messages.length - 1) : messages).map(m => {*/}
+            {/*    if (m.role === "user") return (*/}
+            {/*      <div key={m.id} className="font-bold text-xl">{m.content}</div>*/}
+            {/*    )*/}
+            {/*    return (*/}
+            {/*      <div key={m.id} className="mb-2 text-neutral-400">{m.content}</div>*/}
+            {/*    )*/}
+            {/*  })*/}
+            {/*}*/}
+                {/*FROM ORIGINAL*/}
+
             {
-              // If loading, do not show the last message statically
               (shouldAnimateLastMessage ? messages.slice(0, messages.length - 1) : messages).map(m => {
-                if (m.role === "user") return (
-                  <div key={m.id} className="font-bold text-xl">{m.content}</div>
-                )
+                if (m.role === "user") {
+                  return (
+                    <div key={m.id} className="font-bold text-xl">
+                      {m.content.split("\n").map((line, lineIndex) => (
+                        <div key={lineIndex}>{line}</div>
+                      ))}
+                    </div>
+                  );
+                }
                 return (
-                  <div key={m.id} className="mb-2 text-neutral-400">{m.content}</div>
-                )
+                  <div key={m.id} className="mb-2 text-neutral-400" style={{ whiteSpace: 'pre-wrap' }}>
+                    {m.content}
+                  </div>
+                );
               })
             }
+
+            {/*FROM ORIGINAL*/}
+            {/*{isLoading && shouldAnimateLastMessage && (*/}
+            {/*  // When loading, animate chunks of the latest message*/}
+            {/*  <div>*/}
+            {/*    {chunkString(messages[messages.length - 1].content).map((chunk, index) => (*/}
+            {/*      <motion.span*/}
+            {/*        key={index}*/}
+            {/*        initial={{ opacity: 0 }}*/}
+            {/*        animate={{ opacity: 1 }}*/}
+            {/*        transition={{ duration: 0.75 }}*/}
+            {/*        className="mb-2 text-neutral-400"*/}
+            {/*      >*/}
+            {/*        {chunk}*/}
+            {/*      </motion.span>*/}
+            {/*    ))}*/}
+            {/*  </div>*/}
+            {/*)}*/}
+            {/*FROM ORIGINAL*/}
+
             {isLoading && shouldAnimateLastMessage && (
-              // When loading, animate chunks of the latest message
               <div>
                 {chunkString(messages[messages.length - 1].content).map((chunk, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.75 }}
-                    className="mb-2 text-neutral-400"
-                  >
-                    {chunk}
-                  </motion.span>
+                  chunk === "\n" ? (
+                    <br key={index} />
+                  ) : (
+                    <motion.span
+                      key={index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.75 }}
+                      className="mb-2 text-neutral-400"
+                    >
+                      {chunk}
+                    </motion.span>
+                  )
                 ))}
               </div>
             )}
+
           </div>
 
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
@@ -109,12 +185,7 @@ export default function Home() {
               </div>
             </form>
             <div className="w-full flex items-center justify-center">
-              <a className="text-neutral-400 text-xs mt-2 hover:scale-110 transition-all duration-500 cursor-pointer"
-                 onClick={() => {
-                   window.open("https://reworkd.ai/", "_blank");
-                 }}>
-                Made with ❤️ by Reworkd
-              </a>
+
             </div>
           </motion.div>
         </div>

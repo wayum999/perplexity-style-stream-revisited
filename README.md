@@ -3,8 +3,6 @@ This project is based off the  Reworkd attempt (https://github.com/reworkd/perpl
 
 ## REVISED DEMO
 
-https://github.com/reworkd/perplexity-style-streaming/assets/50181239/341a267d-ccf3-48ec-b42c-89f2bb0a403f
-
 
 ## SETUP
 

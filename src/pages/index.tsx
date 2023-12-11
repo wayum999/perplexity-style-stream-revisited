@@ -6,17 +6,19 @@ import Head from "next/head";
 import { Analytics } from '@vercel/analytics/react';
 
 
-
+// Define a function to handle chunking of messages
 function chunkString(str: string): string[] {
   const chunks: string[] = [];
   const words = str.split(" ");
 
+  // Iterate over each chunk
   for (let i = 0; i < words.length; i++) {
     let chunk = words[i];
     let nextChunk = (i + 1 < words.length) ? words[i + 1] : "";
 
     if (chunk.includes("\n")) {
-      // Handle newline characters
+        // Split each chunk into sub-chunks by newline character
+
       const subChunks = chunk.split("\n");
       subChunks.forEach((subChunk, index) => {
         chunks.push(subChunk);
@@ -34,17 +36,19 @@ function chunkString(str: string): string[] {
   return chunks;
 }
 
-
+// Define the Home component of the application
 export default function Home() {
-  const { messages, input, handleInputChange, isLoading, handleSubmit } = useChat()
 
+  // Use the useChat() hook to get chat-related variables and functions
+  const { messages, input, handleInputChange, isLoading, handleSubmit } = useChat()
+  // Calculate if the last message should be animated
   const shouldAnimateLastMessage = isLoading && messages.length > 0 && messages[messages.length - 1].role !== "user"
   const lastMessage = messages[messages.length - 1]; // Get the last message
 
   return (
     <>
       <Head>
-        <title>Reworkd - Animated streaming</title>
+        <title>WILLIAM LETTIERI - Animated streaming</title>
         <meta name="description" content="A demonstration of how to achieve Perplexity style text streaming" />
         <meta name="twitter:site" content="@ReworkdAI" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -64,7 +68,7 @@ export default function Home() {
       </Head>
       <Analytics />
 
-    <div className="bg-zinc-900 w-screen min-h-screen flex items-start justify-center font-sans">
+    <div className="bg-zinc-900 w-screen min-h-screen flex items-start justify-center font-sans pb-15">
         <div className="max-w-screen-md flex-1 flex flex-col p-5 sm:p-7">
 
           <div className="flex-1 w-full overflow-auto">
@@ -91,7 +95,7 @@ export default function Home() {
                   );
                 }
                 return (
-                  <div key={m.id} className="mb-2 text-neutral-400" style={{ whiteSpace: 'pre-wrap' }}>
+                  <div key={m.id} className="mb-15 text-neutral-400" style={{ whiteSpace: 'pre-wrap' }}>
                     {m.content}
                   </div>
                 );
@@ -120,20 +124,16 @@ export default function Home() {
 
           </div>
 
-
-
-
-
         <motion.div
   initial={{ y: 100, opacity: 0 }} // starts 100 pixels below the final position
   animate={{ y: 0, opacity: 1 }} // ends at its actual position
   transition={{ duration: 1.5 }} // adjust duration as needed
-  className="fixed bottom-0 left-0 right-0 flex flex-col items-center p-1.5 bg-white/5 text-sm"
+  className="fixed bottom-0 left-0 right-0 flex flex-col items-center p-5 text-sm bg-zinc-800 opacity-100"
 >
   <form onSubmit={handleSubmit} className="relative w-full max-w-screen-md">
               <input
                   style={{position: 'relative', zIndex: 2}}
-                className="text-white w-full p-3 pl-5 pr-14 bg-transparent border-[2px] border-white/5 hover:border-white/20 focus:border-blue-400 outline-0 transition-all duration-500"
+                className="text-white w-full p-3 pl-5 pr-14 bg-transparent border-[2px] rounded-md border-white/5 hover:border-white/20 focus:border-blue-400 outline-0 transition-all duration-500"
                 value={input}
                 placeholder="Ask a question..."
                 onChange={handleInputChange}

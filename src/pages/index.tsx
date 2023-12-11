@@ -87,7 +87,7 @@ export default function Home() {
               (shouldAnimateLastMessage ? messages.slice(0, messages.length - 1) : messages).map(m => {
                 if (m.role === "user") {
                   return (
-                    <div key={m.id} className="font-bold text-xl">
+                    <div key={m.id} className="font-bold text-xl ">
                       {m.content.split("\n").map((line, lineIndex) => (
                         <div key={lineIndex}>{line}</div>
                       ))}
@@ -95,7 +95,7 @@ export default function Home() {
                   );
                 }
                 return (
-                  <div key={m.id} className="mb-15 text-neutral-400" style={{ whiteSpace: 'pre-wrap' }}>
+                  <div key={m.id} className="mb-10 text-neutral-400" style={{ whiteSpace: 'pre-wrap' }}>
                     {m.content}
                   </div>
                 );

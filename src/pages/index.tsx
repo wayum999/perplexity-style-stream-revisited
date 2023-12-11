@@ -68,10 +68,10 @@ export default function Home() {
       </Head>
       <Analytics />
 
-    <div className="bg-zinc-900 w-screen min-h-screen flex items-start justify-center font-sans pb-15">
-        <div className="max-w-screen-md flex-1 flex flex-col p-5 sm:p-7">
+    <div className="bg-zinc-900 w-screen min-h-screen flex items-start justify-center font-sans pb-25">
+        <div className="max-w-screen-md flex-1 flex flex-col pb-5 sm:p-7">
 
-          <div className="flex-1 w-full overflow-auto">
+          <div className="flex-1 w-full overflow-auto pb-10 mb-20">
             <motion.div initial={{ y: -30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 2, delay: 0.5 }}>
               {
@@ -128,7 +128,7 @@ export default function Home() {
   initial={{ y: 100, opacity: 0 }} // starts 100 pixels below the final position
   animate={{ y: 0, opacity: 1 }} // ends at its actual position
   transition={{ duration: 1.5 }} // adjust duration as needed
-  className="fixed bottom-0 left-0 right-0 flex flex-col items-center p-5 text-sm bg-zinc-800 opacity-100"
+  className="fixed bottom-0 left-0 right-0 flex flex-col items-center p-5 text-sm bg-zinc-900/100 opacity-100"
 >
   <form onSubmit={handleSubmit} className="relative w-full max-w-screen-md">
               <input

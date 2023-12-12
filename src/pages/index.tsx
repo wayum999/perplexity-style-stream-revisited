@@ -87,7 +87,7 @@ export default function Home() {
               (shouldAnimateLastMessage ? messages.slice(0, messages.length - 1) : messages).map(m => {
                 if (m.role === "user") {
                   return (
-                    <div key={m.id} className="font-bold text-xl ">
+                    <div key={m.id} className="font-bold text-xl pb-2">
                       {m.content.split("\n").map((line, lineIndex) => (
                         <div key={lineIndex}>{line}</div>
                       ))}
@@ -135,7 +135,7 @@ export default function Home() {
                   style={{position: 'relative', zIndex: 2}}
                 className="text-white w-full p-3 pl-5 pr-14 bg-transparent border-[2px] rounded-md border-white/5 hover:border-white/20 focus:border-blue-400 outline-0 transition-all duration-500"
                 value={input}
-                placeholder="Ask a question..."
+                placeholder="How can I help you?"
                 onChange={handleInputChange}
               />
     <div
@@ -143,7 +143,7 @@ export default function Home() {
   className={`absolute right-1.5 top-1.5 ${isLoading ? "bg-neutral-400" : "bg-blue-500 hover:bg-blue-400"} p-2 rounded-full transition-colors duration-500 cursor-pointer`}
   onClick={(e) => handleSubmit(e as any)}
 >
-  <AiOutlineArrowUp size={18} />
+  <AiOutlineArrowUp size={20} />
 </div>
             </form>
 

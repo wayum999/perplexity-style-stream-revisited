@@ -1,8 +1,5 @@
 ## INTRO ️
-This project is based off the  Reworkd attempt (https://github.com/reworkd/perplexity-style-streaming) to mimic Perlexity's 'fading chat stream' found at https://www.perplexity.ai/.
-
-## REVISED DEMO
-
+This project is based off the Reworkd attempt (https://github.com/reworkd/perplexity-style-streaming) to mimic Perlexity's 'fading chat stream' found at https://www.perplexity.ai/.
 
 ## SETUP
 

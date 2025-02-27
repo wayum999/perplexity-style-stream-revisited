@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from "framer-motion";
-import { useChat } from 'ai/react'
 import { AiOutlineArrowUp } from "react-icons/ai";
 import Head from "next/head";
 import { Analytics } from '@vercel/analytics/react';
+import { nanoid } from 'nanoid';
+
+// Define message interfaces
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 
 // Define a function to handle chunking of messages
@@ -38,12 +45,92 @@ function chunkString(str: string): string[] {
 
 // Define the Home component of the application
 export default function Home() {
-
-  // Use the useChat() hook to get chat-related variables and functions
-  const { messages, input, handleInputChange, isLoading, handleSubmit } = useChat()
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Calculate if the last message should be animated
   const shouldAnimateLastMessage = isLoading && messages.length > 0 && messages[messages.length - 1].role !== "user"
-  const lastMessage = messages[messages.length - 1]; // Get the last message
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null; // Get the last message
+  
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+  
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    
+    // Add user message
+    const userMessage: Message = {
+      id: nanoid(),
+      role: 'user',
+      content: input,
+    };
+    
+    setMessages((messages) => [...messages, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    
+    // Create initial assistant message
+    const assistantMessageId = nanoid();
+    setMessages((messages) => [
+      ...messages, 
+      { id: assistantMessageId, role: 'assistant', content: '' }
+    ]);
+    
+    try {
+      // Call API and stream response
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages.concat(userMessage).map(({ role, content }) => ({
+            role,
+            content,
+          })),
+        }),
+      });
+      
+      if (!response.ok || !response.body) {
+        throw new Error('Failed to fetch response');
+      }
+      
+      // Set up streaming
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let content = '';
+      
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        const text = decoder.decode(value, { stream: true });
+        content += text;
+        
+        // Update assistant message with new content
+        setMessages((messages) => 
+          messages.map((message) => 
+            message.id === assistantMessageId 
+              ? { ...message, content } 
+              : message
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error during chat:', error);
+      setMessages((messages) => [
+        ...messages.slice(0, -1),
+        { id: assistantMessageId, role: 'assistant', content: 'Sorry, an error occurred while generating a response.' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>

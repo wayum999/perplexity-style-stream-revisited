@@ -166,3 +166,5 @@ cython_debug/
 /.idea/markdown.xml
 /.idea/misc.xml
 /.idea/modules.xml
+.vercel
+.env*.local

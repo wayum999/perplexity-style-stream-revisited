@@ -52,7 +52,7 @@ export default function Home() {
         <meta name="description" content="A demonstration of how to achieve Perplexity style text streaming" />
         <meta name="twitter:site" content="@ReworkdAI" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={"Reworkd - Animated streaming" ?? "AgentGPT 🤖"} />
+        <meta name="twitter:title" content="Reworkd - Animated streaming" />
         <meta name="twitter:description" content="A demonstration of how to achieve Perplexity style text streaming" />
         <meta name="twitter:image" content="https://agentgpt.reworkd.ai/banner.png" />
         <meta name="twitter:image:width" content="1280" />

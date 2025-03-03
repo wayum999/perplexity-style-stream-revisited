@@ -1,4 +1,4 @@
-import { OpenAI } from 'openai'
+import { Configuration, OpenAIApi } from 'openai-edge'
 
 // IMPORTANT! Set the runtime to edge
 export const runtime = 'edge'
@@ -8,38 +8,18 @@ export default async function POST(req: Request) {
   const { messages } = await req.json()
 
   // Create an OpenAI API client (that's edge friendly!)
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '',
-    dangerouslyAllowBrowser: false
+  const config = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY || ''
   })
+  const openai = new OpenAIApi(config)
 
   // Ask OpenAI for a streaming chat completion given the prompt
-  const response = await openai.chat.completions.create({
+  const response = await openai.createChatCompletion({
     model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
     stream: true,
     messages
   })
   
-  // Create a readable stream from the response
-  const encoder = new TextEncoder()
-  const stream = new ReadableStream({
-    async start(controller) {
-      // Callback for each token in the stream
-      for await (const chunk of response) {
-        const content = chunk.choices[0]?.delta?.content || ''
-        if (content) {
-          // Send the content as a stream
-          controller.enqueue(encoder.encode(content))
-        }
-      }
-      controller.close()
-    }
-  })
-  
-  // Return the stream as a text response
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-    },
-  })
+  // Return the stream response directly
+  return response
 }

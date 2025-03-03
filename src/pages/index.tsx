@@ -109,17 +109,44 @@ export default function Home() {
         const { value, done } = await reader.read();
         if (done) break;
         
-        const text = decoder.decode(value, { stream: true });
-        content += text;
+        // Decode the current chunk
+        const chunk = decoder.decode(value, { stream: true });
         
-        // Update assistant message with new content
-        setMessages((messages) => 
-          messages.map((message) => 
-            message.id === assistantMessageId 
-              ? { ...message, content } 
-              : message
-          )
-        );
+        try {
+          // Process SSE data format
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(5);
+              
+              // Check for [DONE] message
+              if (data === '[DONE]') continue;
+              
+              // Parse JSON data
+              try {
+                const json = JSON.parse(data);
+                // Extract content delta
+                const contentDelta = json.choices[0]?.delta?.content || '';
+                if (contentDelta) {
+                  content += contentDelta;
+                  
+                  // Update assistant message with new content
+                  setMessages((messages) => 
+                    messages.map((message) => 
+                      message.id === assistantMessageId 
+                        ? { ...message, content } 
+                        : message
+                    )
+                  );
+                }
+              } catch (e) {
+                console.error('Error parsing JSON:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error processing stream:', e);
+        }
       }
     } catch (error) {
       console.error('Error during chat:', error);

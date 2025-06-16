@@ -168,3 +168,4 @@ cython_debug/
 /.idea/modules.xml
 .vercel
 .env*.local
+.claude/run_claude.sh

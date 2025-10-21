@@ -103,48 +103,47 @@ export default function Home() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let content = '';
-      
+      let buffer = ''; // Buffer for incomplete lines
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        
-        // Decode the current chunk
-        const chunk = decoder.decode(value, { stream: true });
-        
-        try {
-          // Process SSE data format
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(5).trim();
 
-              // Check for [DONE] message (handle both with and without quotes)
-              if (data === '[DONE]' || data === '"[DONE]"') continue;
-              
-              // Parse JSON data
-              try {
-                const json = JSON.parse(data);
-                // Extract content delta
-                const contentDelta = json.choices[0]?.delta?.content || '';
-                if (contentDelta) {
-                  content += contentDelta;
-                  
-                  // Update assistant message with new content
-                  setMessages((messages) => 
-                    messages.map((message) => 
-                      message.id === assistantMessageId 
-                        ? { ...message, content } 
-                        : message
-                    )
-                  );
-                }
-              } catch (e) {
-                console.error('Error parsing JSON:', e);
+        // Decode the current chunk and add to buffer
+        buffer += decoder.decode(value, { stream: true });
+
+        // Split by newlines but keep the last incomplete line in the buffer
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep the last (potentially incomplete) line
+
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
+            const data = line.slice(line.indexOf('data: ') + 6).trim();
+
+            // Check for [DONE] message (handle both with and without quotes)
+            if (data === '[DONE]' || data === '"[DONE]"') continue;
+
+            // Parse JSON data
+            try {
+              const json = JSON.parse(data);
+              // Extract content delta
+              const contentDelta = json.choices[0]?.delta?.content || '';
+              if (contentDelta) {
+                content += contentDelta;
+
+                // Update assistant message with new content
+                setMessages((messages) =>
+                  messages.map((message) =>
+                    message.id === assistantMessageId
+                      ? { ...message, content }
+                      : message
+                  )
+                );
               }
+            } catch (e) {
+              console.error('Error parsing JSON:', e, data);
             }
           }
-        } catch (e) {
-          console.error('Error processing stream:', e);
         }
       }
     } catch (error) {

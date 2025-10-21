@@ -15,7 +15,7 @@ export default async function POST(req: Request) {
 
   // Ask OpenAI for a streaming chat completion given the prompt
   const response = await openai.createChatCompletion({
-    model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+    model: process.env.OPENAI_MODEL || 'gpt-4.1-nano',
     stream: true,
     messages
   })

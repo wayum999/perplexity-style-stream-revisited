@@ -14,31 +14,29 @@ interface Message {
 
 
 // Define a function to handle chunking of messages
-function chunkString(str: string): string[] {
-  const chunks: string[] = [];
-  const words = str.split(" ");
+function chunkString(str: string): Array<{ type: 'text' | 'newline', content: string }> {
+  const chunks: Array<{ type: 'text' | 'newline', content: string }> = [];
+  const lines = str.split('\n');
 
-  // Iterate over each chunk
-  for (let i = 0; i < words.length; i++) {
-    let chunk = words[i];
-    let nextChunk = (i + 1 < words.length) ? words[i + 1] : "";
-
-    if (chunk.includes("\n")) {
-        // Split each chunk into sub-chunks by newline character
-
-      const subChunks = chunk.split("\n");
-      subChunks.forEach((subChunk, index) => {
-        chunks.push(subChunk);
-        if (index < subChunks.length - 1) {
-          chunks.push("\n");
-        } else if (!nextChunk.includes("\n")) {
-          chunks.push(" ");  // Add space if the next chunk doesn't start with a newline
+  lines.forEach((line, lineIndex) => {
+    if (line) {
+      // Split line into words and preserve spaces
+      const words = line.split(' ');
+      words.forEach((word, wordIndex) => {
+        if (word) {
+          chunks.push({ type: 'text', content: word });
+        }
+        // Add space after word (except for last word in line)
+        if (wordIndex < words.length - 1) {
+          chunks.push({ type: 'text', content: ' ' });
         }
       });
-    } else {
-      chunks.push(chunk + (nextChunk.includes("\n") ? "" : " "));
     }
-  }
+    // Add newline (except after last line)
+    if (lineIndex < lines.length - 1) {
+      chunks.push({ type: 'newline', content: '\n' });
+    }
+  });
 
   return chunks;
 }
@@ -49,8 +47,9 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  // Calculate if the last message should be animated
-  const shouldAnimateLastMessage = isLoading && messages.length > 0 && messages[messages.length - 1].role !== "user"
+  // Calculate if the last message should be rendered with chunks
+  const shouldRenderLastMessageAsChunks = messages.length > 0 && messages[messages.length - 1].role === "assistant"
+  const shouldAnimateChunks = isLoading && shouldRenderLastMessageAsChunks
   const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null; // Get the last message
   
   // Handle input change
@@ -117,10 +116,10 @@ export default function Home() {
           const lines = chunk.split('\n').filter(line => line.trim() !== '');
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const data = line.slice(5);
-              
-              // Check for [DONE] message
-              if (data === '[DONE]') continue;
+              const data = line.slice(5).trim();
+
+              // Check for [DONE] message (handle both with and without quotes)
+              if (data === '[DONE]' || data === '"[DONE]"') continue;
               
               // Parse JSON data
               try {
@@ -198,7 +197,7 @@ export default function Home() {
             </motion.div>
 
             {
-              (shouldAnimateLastMessage ? messages.slice(0, messages.length - 1) : messages).map(m => {
+              (shouldRenderLastMessageAsChunks ? messages.slice(0, messages.length - 1) : messages).map(m => {
                 if (m.role === "user") {
                   return (
                     <div key={m.id} className="font-bold text-xl pb-2">
@@ -216,20 +215,19 @@ export default function Home() {
               })
             }
 
-            {isLoading && shouldAnimateLastMessage && (
-              <div>
+            {shouldRenderLastMessageAsChunks && (
+              <div className="mb-10 text-neutral-400">
                 {chunkString(messages[messages.length - 1].content).map((chunk, index) => (
-                  chunk === "\n" ? (
+                  chunk.type === 'newline' ? (
                     <br key={index} />
                   ) : (
                     <motion.span
                       key={index}
-                      initial={{ opacity: 0 }}
+                      initial={shouldAnimateChunks ? { opacity: 0 } : { opacity: 1 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 0.75 }}
-                      className="mb-2 text-neutral-400"
+                      transition={{ duration: shouldAnimateChunks ? 0.75 : 0 }}
                     >
-                      {chunk}
+                      {chunk.content}
                     </motion.span>
                   )
                 ))}
